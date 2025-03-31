@@ -14,18 +14,16 @@ app.post('/api/summarize', async (req, res) => {
 
     try {
         // Forward to Python's /summarize endpoint
-        const pyResponse = await fetch('http://localhost:5001/summarize', {
+        const pyResponse = await fetch('http://127.0.0.1:5001/summarize', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ url })
         });
-
         if (!pyResponse.ok) {
             const errText = await pyResponse.text();
             console.error('[SUMMARIZE] Python service error:', errText);
             return res.status(500).json({ error: 'Error summarizing the text.' });
         }
-
         const data = await pyResponse.json();
         console.log('[SUMMARIZE] Received data from Python:', data);
 
