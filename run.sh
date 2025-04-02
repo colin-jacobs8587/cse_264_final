@@ -20,14 +20,14 @@ cleanup() {
 trap cleanup SIGINT SIGTERM
 
 # 1. Go into the aisummary folder
-cd /Users/colinjacobs/Desktop/school/cse264/final/aisummary || exit
+cd /Users/colinjacobs/Desktop/school/cse264/redis/cse_264_final/aisummary || exit
 
 # 2. Start the frontend in the background
 npm start &
 frontend_pid=$!
 
 # 3. Go into the backend folder
-cd /Users/colinjacobs/Desktop/school/cse264/final/backend || exit
+cd /Users/colinjacobs/Desktop/school/cse264/redis/cse_264_final/backend || exit
 
 # 4. Start the Python backend in the background
 python3 app.py &

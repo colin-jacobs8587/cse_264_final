@@ -1,3 +1,0 @@
-python3 -m pip install transformers
-pip install beautifulsoup4
-pip install boilerpy3
