@@ -2,18 +2,50 @@ require('dotenv').config();
 const express = require('express');
 const fetch = require('node-fetch');
 const cors = require('cors');
+const redis = require('redis');
 
 const app = express();
 app.use(cors());
 app.use(express.json());
 
-// 1) Summarize route
+// Initialize Redis client
+const redisClient = redis.createClient({
+    url: 'redis://localhost:6379'
+  });
+  redisClient.on('error', (err) => console.error('Redis Client Error', err));
+  redisClient.connect().catch(console.error);
+
+
+// Summarize route
 app.post('/api/summarize', async (req, res) => {
     const { url } = req.body;
     console.log('[SUMMARIZE] Received request for URL:', url);
 
+    // Create a unique cache key for the URL
+    const cacheKey = `summary:${url}`;
+
     try {
-        // Forward to Python's /summarize endpoint
+        // Check if the summary exists in Redis
+        const cachedSummary = await redisClient.get(cacheKey);
+        if (cachedSummary) {
+            console.log('[SUMMARIZE] Cache hit for URL:', url);
+            // Forward the cached summary to the Python cached endpoint
+            const pyCachedResponse = await fetch('http://127.0.0.1:5001/summarize/cached', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ url, summary: cachedSummary })
+            });
+            if (!pyCachedResponse.ok) {
+                const errText = await pyCachedResponse.text();
+                console.error('[SUMMARIZE] Python cached service error:', errText);
+                return res.status(500).json({ error: 'Error processing cached summary.' });
+            }
+            const cachedData = await pyCachedResponse.json();
+            return res.json({ summary: cachedData.summary_text });
+        }
+
+        // If no cache entry exists, forward to the normal Python summarization service
+        console.log('[SUMMARIZE] Cache miss. Forwarding to Python summarization service.');
         const pyResponse = await fetch('http://127.0.0.1:5001/summarize', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -27,17 +59,19 @@ app.post('/api/summarize', async (req, res) => {
         const data = await pyResponse.json();
         console.log('[SUMMARIZE] Received data from Python:', data);
 
-        // Return summary to frontend
-        res.json({
-            summary: data.summary_text
-        });
+        // Store the new summary in Redis for future requests
+        await redisClient.set(cacheKey, data.summary_text);
+
+        // Return the summary to the frontend
+        res.json({ summary: data.summary_text });
     } catch (error) {
         console.error('[SUMMARIZE] Error in Express route:', error);
         res.status(500).json({ error: 'Error processing summary.' });
     }
 });
 
-// 2) Sentiment route
+
+// Sentiment route
 app.post('/api/sentiment', async (req, res) => {
     const { url } = req.body;
     console.log('[SENTIMENT] Received request for URL:', url);
@@ -70,7 +104,7 @@ app.post('/api/sentiment', async (req, res) => {
     }
 });
 
-// 3) Classification route
+// Classification route
 app.post('/api/classify', async (req, res) => {
     const { url, labels } = req.body;
     console.log('[CLASSIFY] Received request for URL:', url);
