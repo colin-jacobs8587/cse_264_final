@@ -14,7 +14,6 @@ logging.basicConfig(level=logging.DEBUG)
 
 app = Flask(__name__)
 
-logging.debug("Loading summarization model...")
 summarizer = pipeline(
     "summarization",
     model="google/pegasus-cnn_dailymail",
@@ -23,12 +22,10 @@ summarizer = pipeline(
 )
 logging.debug("Summarization model loaded.")
 
-logging.debug("Loading sentiment analysis model...")
 sentiment_analyzer = pipeline("sentiment-analysis")
 logging.debug("Sentiment analysis model loaded.")
 
 
-logging.debug("Loading AG News classifier model...")
 classifier = pipeline("text-classification", model="textattack/distilbert-base-uncased-ag-news")
 logging.debug("AG News classifier model loaded.")
 
