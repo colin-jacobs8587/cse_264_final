@@ -80,6 +80,8 @@ def summarize():
         
         # Save the full extracted text in Redis with the URL as the key
         redis_client.set(url, text)
+        logging.debug(f"Url: {url}")
+        logging.debug(f"Text: {text}")
         
         # Use a truncated version of the text for summarization
         truncated_text = text[:3000]
@@ -104,11 +106,12 @@ def summarize():
 def summarize_cached():
     data = request.get_json()
     url = data.get('url', '')
-    cached_summary = data.get('summary', '')
+    cached_text = data.get('summary', '')
     logging.debug(f"[SUMMARIZE-CACHED] Received URL: {url} with cached summary.")
-
+    logging.debug(f"Url: {url}")
+    logging.debug(f"Text: {cached_text}")
     try:
-        truncated_text = cached_summary[:3000]
+        truncated_text = cached_text[:3000]
         summary_result = summarizer(
             truncated_text,
             max_length=150,
@@ -133,6 +136,8 @@ def sentiment():
     logging.debug(f"[SENTIMENT] Received URL: {url}")
     try:
         text = extract_text_with_newspaper(url)
+        print(text)
+        redis_client.set(url, text)
         short_text = text[:2000]
         sentiment_result = sentiment_analyzer(short_text, truncation=True)
         label = sentiment_result[0]['label']
@@ -145,6 +150,29 @@ def sentiment():
     except Exception as e:
         logging.error("[SENTIMENT] Error:", exc_info=True)
         return jsonify({'error': 'Error analyzing sentiment.'}), 500
+
+@app.route('/sentiment/cached', methods=['POST'])
+def sentiment_cached():
+    data = request.get_json()
+    url = data.get('url', '')
+    cached_text = data.get('summary', '')
+    logging.debug(f"[SENTIMENT-CACHED] Received URL: {url}")
+    logging.debug(f"Url: {url}")
+    logging.debug(f"Text: {cached_text}")    
+    try:
+        short_text = cached_text[:2000]
+        sentiment_result = sentiment_analyzer(short_text, truncation=True)
+        label = sentiment_result[0]['label']
+        score = sentiment_result[0]['score']
+        logging.debug(f"[SENTIMENT] {label} (score: {score})")
+        return jsonify({
+            'sentiment_label': label,
+            'sentiment_score': score
+        })
+    except Exception as e:
+        logging.error("[SENTIMENT] Error:", exc_info=True)
+        return jsonify({'error': 'Error analyzing sentiment.'}), 500
+
 
 if __name__ == '__main__':
     logging.debug("Starting Python service on port 5001...")
