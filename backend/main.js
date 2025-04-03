@@ -3,6 +3,7 @@ const express = require("express");
 const fetch = require("node-fetch");
 const cors = require("cors");
 const redis = require("redis");
+const { MongoClient } = require('mongodb');
 
 const app = express();
 app.use(cors());
@@ -15,6 +16,18 @@ const redisClient = redis.createClient({
 redisClient.on("error", (err) => console.error("Redis Client Error", err));
 redisClient.connect().catch(console.error);
 
+// Mongo connection
+const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@${process.env.MONGO_HOST}/?${process.env.MONGO_OPTIONS}`;
+let summariesCollection;
+
+MongoClient.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
+  .then(client => {
+    const db = client.db('summaries_db');  // adjust to your database name
+    summariesCollection = db.collection('summaries');
+    console.log("Connected to MongoDB");
+  })
+  .catch(err => console.error(err));
+
 // Summarize route
 app.post("/api/summarize", async (req, res) => {
   const { url } = req.body;
@@ -24,9 +37,15 @@ app.post("/api/summarize", async (req, res) => {
   const cacheKey = `${url}`;
 
   try {
+    if (summariesCollection) {
+        const document = await summariesCollection.findOne({ url });
+        if (document) {
+          console.log("[SUMMARIZE] MongoDB hit for URL:", url);
+          return res.json({ summary: document.summary_text });
+        }
+      } 
     // Check if the summary exists in Redis
     const cached_text = await redisClient.get(cacheKey);
-    console.log("look here ", cached_text);
     if (cached_text) {
       console.log("[SUMMARIZE] Cache hit for URL:", url);
       // Forward the cached summary to the Python cached endpoint
@@ -137,9 +156,8 @@ app.post("/api/sentiment", async (req, res) => {
 
 // Classification route
 app.post("/api/classify", async (req, res) => {
-  const { url, labels } = req.body;
+  const { url } = req.body;
   console.log("[CLASSIFY] Received request for URL:", url);
-  console.log("[CLASSIFY] Candidate labels:", labels);
   const cacheKey = `${url}`;
 
   try {
@@ -153,7 +171,7 @@ app.post("/api/classify", async (req, res) => {
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url, labels, summary: cached_text }),
+          body: JSON.stringify({ url, summary: cached_text }),
         }
       );
       if (!pyCachedResponse.ok) {
@@ -173,7 +191,7 @@ app.post("/api/classify", async (req, res) => {
       const pyResponse = await fetch("http://localhost:5001/classify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ url, labels }),
+        body: JSON.stringify({ url }),
       });
 
       if (!pyResponse.ok) {

@@ -3,3 +3,5 @@ beautifulsoup4
 boilerpy3
 newspaper3k
 redis
+pymongo
+python-dotenv

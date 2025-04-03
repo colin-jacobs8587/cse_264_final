@@ -6,11 +6,36 @@ import logging
 from boilerpy3 import extractors
 import newspaper
 import redis
+from pymongo.mongo_client import MongoClient
+from pymongo.server_api import ServerApi
+from dotenv import load_dotenv
+import os
+load_dotenv()  # load variables from .env file
+
+# Construct the MongoDB URI from environment variables
+mongo_user = os.getenv("MONGO_USER")
+mongo_pass = os.getenv("MONGO_PASS")
+mongo_host = os.getenv("MONGO_HOST")
+mongo_options = os.getenv("MONGO_OPTIONS")
+mongo_db_db = os.getenv("MONGO_DB_DB")
+mongo_collection= os.getenv("MONGO_COLLECTION")
+
+
+uri = f"mongodb+srv://{mongo_user}:{mongo_pass}@{mongo_host}/?{mongo_options}"
+
+# Create a new client and connect to the server
+client = MongoClient(uri, server_api=ServerApi('1'))
+
+# sets which mongodb db to use
+db = client[mongo_db_db]
+
+# sets the summaries collection
+summaries_collection = db[mongo_collection]
 
 # Initialize Redis client
 redis_client = redis.Redis(host='localhost', port=6379, db=0)
 
-logging.basicConfig(level=logging.DEBUG)
+logging.basicConfig(level=logging.INFO)
 
 app = Flask(__name__)
 
@@ -135,6 +160,12 @@ def summarize():
         )
         summary_text = summary_result[0].get('summary_text', 'No summary available')
         logging.debug(f"[SUMMARIZE] Summary: {summary_text}")
+          
+        # Insert the summary into MongoDB 
+        summaries_collection.insert_one({
+            "url": url,
+            "summary_text": summary_text,
+        })   
         return jsonify({'summary_text': summary_text})
     except Exception as e:
         logging.error("[SUMMARIZE] Error:", exc_info=True)
@@ -162,6 +193,12 @@ def summarize_cached():
         )
         summary_text = summary_result[0].get('summary_text', 'No summary available')
         logging.debug(f"[SUMMARIZE-CACHED] Final Summary: {summary_text}")
+
+        # Insert the summary into MongoDB 
+        summaries_collection.insert_one({
+            "url": url,
+            "summary_text": summary_text,
+        })   
         return jsonify({'summary_text': summary_text})
     except Exception as e:
         logging.error("[SUMMARIZE-CACHED] Error:", exc_info=True)
