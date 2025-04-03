@@ -80,11 +80,11 @@ app.post("/api/sentiment", async (req, res) => {
   const cacheKey = `${url}`;
 
   try {
-    // Check if the summary exists in Redis
+    // Check if the sentiment exists in Redis
     const cached_text = await redisClient.get(cacheKey);
     if (cached_text) {
       console.log("[SUMMARIZE] Cache hit for URL:", url);
-      // Forward the cached summary to the Python cached endpoint
+      // Forward the cached text to the Python cached endpoint
       const pyCachedResponse = await fetch(
         "http://localhost:5001/sentiment/cached",
         {
@@ -123,7 +123,6 @@ app.post("/api/sentiment", async (req, res) => {
       const data = await pyResponse.json();
       console.log("[SUMMARIZE] Received data from Python:", data);
 
-      // Return the summary to the frontend
       // Return the sentiment data to the frontend
       res.json({
         sentimentLabel: data.sentiment_label,
@@ -141,26 +140,54 @@ app.post("/api/classify", async (req, res) => {
   const { url, labels } = req.body;
   console.log("[CLASSIFY] Received request for URL:", url);
   console.log("[CLASSIFY] Candidate labels:", labels);
+  const cacheKey = `${url}`;
 
   try {
-    // Forward to Python's /classify endpoint
-    const pyResponse = await fetch("http://localhost:5001/classify", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ url, labels }),
-    });
+    const cached_text = await redisClient.get(cacheKey);
 
-    if (!pyResponse.ok) {
-      const errText = await pyResponse.text();
-      console.error("[CLASSIFY] Python service error:", errText);
-      return res.status(500).json({ error: "Error classifying the text." });
+    if (cached_text) {
+      console.log("[SUMMARIZE] Cache hit for URL:", url);
+      // Forward the cached text to the Python cached endpoint
+      const pyCachedResponse = await fetch(
+        "http://localhost:5001/classify/cached",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url, labels, summary: cached_text }),
+        }
+      );
+      if (!pyCachedResponse.ok) {
+        const errText = await pyCachedResponse.text();
+        console.error("[CLASSIFY] Python cached service error:", errText);
+        return res
+          .status(500)
+          .json({ error: "Error processing cached summary." });
+      }
+      const cachedData = await pyCachedResponse.json();
+      // Return classification data to frontend
+      res.json(cachedData);
+    } else {
+        console.log("[SUMMARIZE] Cache miss for URL:", url);
+
+      // Forward to Python's /classify endpoint
+      const pyResponse = await fetch("http://localhost:5001/classify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url, labels }),
+      });
+
+      if (!pyResponse.ok) {
+        const errText = await pyResponse.text();
+        console.error("[CLASSIFY] Python service error:", errText);
+        return res.status(500).json({ error: "Error classifying the text." });
+      }
+
+      const data = await pyResponse.json();
+      console.log("[CLASSIFY] Received data from Python:", data);
+
+      // Return classification data to frontend
+      res.json(data);
     }
-
-    const data = await pyResponse.json();
-    console.log("[CLASSIFY] Received data from Python:", data);
-
-    // Return classification data to frontend
-    res.json(data);
   } catch (error) {
     console.error("[CLASSIFY] Error in Express route:", error);
     res.status(500).json({ error: "Error processing classification." });

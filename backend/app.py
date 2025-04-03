@@ -44,7 +44,46 @@ def classify():
 
     try:
         text = extract_text_with_newspaper(url)
+         # Save the full extracted text in Redis with the URL as the key
+        redis_client.set(url, text)
+        logging.debug(f"Url: {url}")
+        logging.debug(f"Text: {text}")
         truncated_text = text[:1024]
+
+        # Run text classification using the AG News model.
+        classification_result = classifier(truncated_text, truncation=True)
+
+        # model returns labels 
+        label_mapping = {
+            "LABEL_0": "World",
+            "LABEL_1": "Sports",
+            "LABEL_2": "Business",
+            "LABEL_3": "Sci/Tech"
+        }
+
+        # Remap the labels in the classification result.
+        for result in classification_result:
+            result['label'] = label_mapping.get(result['label'], result['label'])
+
+        logging.debug(f"[CLASSIFY] Classification result: {classification_result}")
+
+        return jsonify(classification_result)
+    except Exception as e:
+        logging.error("[CLASSIFY] Error:", exc_info=True)
+        return jsonify({'error': 'Error classifying the text.'}), 500
+
+@app.route('/classify/cached', methods=['POST'])
+def classify_cached():
+    data = request.get_json()
+    url = data.get('url', '')
+    logging.debug(f"[CLASSIFY] Received URL: {url}")
+    cached_text = data.get('summary', '')
+    logging.debug(f"[CLASSIFY-CACHED] Received URL: {url} with cached summary.")
+    logging.debug(f"Url: {url}")
+    logging.debug(f"Text: {cached_text}")
+    try:
+        cached_text = extract_text_with_newspaper(url)
+        truncated_text = cached_text[:1024]
 
         # Run text classification using the AG News model.
         classification_result = classifier(truncated_text, truncation=True)
