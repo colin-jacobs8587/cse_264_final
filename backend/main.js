@@ -22,8 +22,8 @@ let summariesCollection;
 
 MongoClient.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
   .then(client => {
-    const db = client.db('summaries_db');  // adjust to your database name
-    summariesCollection = db.collection('summaries');
+    const db = client.db(process.env.MONGO_DB_DB); 
+    summariesCollection = db.collection(process.env.MONGO_COLLECTION);
     console.log("Connected to MongoDB");
   })
   .catch(err => console.error(err));
