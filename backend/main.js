@@ -105,7 +105,7 @@ app.post("/api/sentiment", async (req, res) => {
       console.log("[SUMMARIZE] Cache hit for URL:", url);
       // Forward the cached text to the Python cached endpoint
       const pyCachedResponse = await fetch(
-        "http://localhost:5001/sentiment/cached",
+        "http://127.0.0.1:5001/sentiment/cached",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -167,7 +167,7 @@ app.post("/api/classify", async (req, res) => {
       console.log("[SUMMARIZE] Cache hit for URL:", url);
       // Forward the cached text to the Python cached endpoint
       const pyCachedResponse = await fetch(
-        "http://localhost:5001/classify/cached",
+        "http://127.0.0.1:5001/classify/cached",
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -188,7 +188,7 @@ app.post("/api/classify", async (req, res) => {
         console.log("[SUMMARIZE] Cache miss for URL:", url);
 
       // Forward to Python's /classify endpoint
-      const pyResponse = await fetch("http://localhost:5001/classify", {
+      const pyResponse = await fetch("http://127.0.0.1:5001/classify", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
