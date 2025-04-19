@@ -3,8 +3,12 @@ const express = require("express");
 const fetch = require("node-fetch");
 const cors = require("cors");
 const redis = require("redis");
-const { MongoClient } = require('mongodb');
+const { MongoClient } = require("mongodb");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+const pg = require("pg");
 
+// Express Setup
 const app = express();
 app.use(cors());
 app.use(express.json());
@@ -21,12 +25,38 @@ const uri = `mongodb+srv://${process.env.MONGO_USER}:${process.env.MONGO_PASS}@$
 let summariesCollection;
 
 MongoClient.connect(uri, { useNewUrlParser: true, useUnifiedTopology: true })
-  .then(client => {
-    const db = client.db(process.env.MONGO_DB_DB); 
-    summariesCollection = db.collection(process.env.MONGO_COLLECTION);
-    console.log("Connected to MongoDB");
-  })
-  .catch(err => console.error(err));
+    .then(client => {
+      const db = client.db(process.env.MONGO_DB_DB);
+      summariesCollection = db.collection(process.env.MONGO_COLLECTION);
+      console.log("Connected to MongoDB");
+    })
+    .catch(err => console.error("MongoDB connection error:", err));
+
+// Postgres connection
+const { Client } = pg;
+const client = new Client({
+  host: process.env.POSTGRES_HOST,
+  port: Number(process.env.POSTGRES_PORT),
+  database: process.env.POSTGRES_DBNAME,
+  user: process.env.POSTGRES_USERNAME,
+  password: process.env.POSTGRES_PASSWORD,
+  ssl: { rejectUnauthorized: false },
+});
+
+client.connect()
+    .then(() => console.log("Connected to PostgreSQL"))
+    .catch(err => console.error("Postgres connection error:", err));
+
+const query = async (text, values) => {
+  try {
+    return await client.query(text, values);
+  } catch (err) {
+    console.error("Postgres query error:", err);
+    throw err;
+  }
+};
+
+const userTable = "lychee_users";
 
 // Summarize route
 app.post("/api/summarize", async (req, res) => {
@@ -38,31 +68,31 @@ app.post("/api/summarize", async (req, res) => {
 
   try {
     if (summariesCollection) {
-        const document = await summariesCollection.findOne({ url });
-        if (document) {
-          console.log("[SUMMARIZE] MongoDB hit for URL:", url);
-          return res.json({ summary: document.summary_text });
-        }
-      } 
+      const document = await summariesCollection.findOne({ url });
+      if (document) {
+        console.log("[SUMMARIZE] MongoDB hit for URL:", url);
+        return res.json({ summary: document.summary_text });
+      }
+    }
     // Check if the summary exists in Redis
     const cached_text = await redisClient.get(cacheKey);
     if (cached_text) {
       console.log("[SUMMARIZE] Cache hit for URL:", url);
       // Forward the cached summary to the Python cached endpoint
       const pyCachedResponse = await fetch(
-        "http://127.0.0.1:5001/summarize/cached",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url, summary: cached_text }),
-        }
+          "http://127.0.0.1:5001/summarize/cached",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url, summary: cached_text }),
+          }
       );
       if (!pyCachedResponse.ok) {
         const errText = await pyCachedResponse.text();
         console.error("[SUMMARIZE] Python cached service error:", errText);
         return res
-          .status(500)
-          .json({ error: "Error processing cached summary." });
+            .status(500)
+            .json({ error: "Error processing cached summary." });
       }
       const cachedData = await pyCachedResponse.json();
       return res.json({ summary: cachedData.summary_text });
@@ -70,7 +100,7 @@ app.post("/api/summarize", async (req, res) => {
 
     // If no cache entry exists, forward to the normal Python summarization service
     console.log(
-      "[SUMMARIZE] Cache miss. Forwarding to Python summarization service."
+        "[SUMMARIZE] Cache miss. Forwarding to Python summarization service."
     );
     const pyResponse = await fetch("http://127.0.0.1:5001/summarize", {
       method: "POST",
@@ -105,19 +135,19 @@ app.post("/api/sentiment", async (req, res) => {
       console.log("[SUMMARIZE] Cache hit for URL:", url);
       // Forward the cached text to the Python cached endpoint
       const pyCachedResponse = await fetch(
-        "http://127.0.0.1:5001/sentiment/cached",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url, summary: cached_text }),
-        }
+          "http://127.0.0.1:5001/sentiment/cached",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url, summary: cached_text }),
+          }
       );
       if (!pyCachedResponse.ok) {
         const errText = await pyCachedResponse.text();
         console.error("[SUMMARIZE] Python cached service error:", errText);
         return res
-          .status(500)
-          .json({ error: "Error processing cached summary." });
+            .status(500)
+            .json({ error: "Error processing cached summary." });
       }
       const cachedData = await pyCachedResponse.json();
       res.json({
@@ -127,7 +157,7 @@ app.post("/api/sentiment", async (req, res) => {
     } else {
       // If no cache entry exists, forward to the normal Python summarization service
       console.log(
-        "[SUMMARIZE] Cache miss. Forwarding to Python summarization service."
+          "[SUMMARIZE] Cache miss. Forwarding to Python summarization service."
       );
       const pyResponse = await fetch("http://127.0.0.1:5001/sentiment", {
         method: "POST",
@@ -167,25 +197,25 @@ app.post("/api/classify", async (req, res) => {
       console.log("[SUMMARIZE] Cache hit for URL:", url);
       // Forward the cached text to the Python cached endpoint
       const pyCachedResponse = await fetch(
-        "http://127.0.0.1:5001/classify/cached",
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url, summary: cached_text }),
-        }
+          "http://127.0.0.1:5001/classify/cached",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ url, summary: cached_text }),
+          }
       );
       if (!pyCachedResponse.ok) {
         const errText = await pyCachedResponse.text();
         console.error("[CLASSIFY] Python cached service error:", errText);
         return res
-          .status(500)
-          .json({ error: "Error processing cached summary." });
+            .status(500)
+            .json({ error: "Error processing cached summary." });
       }
       const cachedData = await pyCachedResponse.json();
       // Return classification data to frontend
       res.json(cachedData);
     } else {
-        console.log("[SUMMARIZE] Cache miss for URL:", url);
+      console.log("[SUMMARIZE] Cache miss for URL:", url);
 
       // Forward to Python's /classify endpoint
       const pyResponse = await fetch("http://127.0.0.1:5001/classify", {
