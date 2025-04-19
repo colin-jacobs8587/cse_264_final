@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 
-function Login({ onLoginSuccess }) {
-    const [loginCredentials, setLoginCredentials] = useState({ username: '', password: '' });
+function Login({onLoginSuccess}) {
+    const [loginCredentials, setLoginCredentials] = useState({username: '', password: ''});
     const [message, setMessage] = useState('');
     const navigate = useNavigate(); // Initialize useNavigate
 
@@ -26,7 +26,7 @@ function Login({ onLoginSuccess }) {
                     placeholder="Username"
                     value={loginCredentials.username}
                     onChange={(e) =>
-                        setLoginCredentials({ ...loginCredentials, username: e.target.value })
+                        setLoginCredentials({...loginCredentials, username: e.target.value})
                     }
                     required
                 />
@@ -35,14 +35,15 @@ function Login({ onLoginSuccess }) {
                     placeholder="Password"
                     value={loginCredentials.password}
                     onChange={(e) =>
-                        setLoginCredentials({ ...loginCredentials, password: e.target.value })
+                        setLoginCredentials({...loginCredentials, password: e.target.value})
                     }
                     required
                 />
                 <button type="submit">Login</button>
             </form>
             {message && <p>{message}</p>}
-            <button onClick={handleRegister}>New User Registration</button> {/* Register button */}
+            <button onClick={handleRegister}>New User Registration</button>
+            {/* Register button */}
         </div>
     );
 }
