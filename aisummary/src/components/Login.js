@@ -1,14 +1,20 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function Login({ onLoginSuccess }) {
     const [loginCredentials, setLoginCredentials] = useState({ username: '', password: '' });
     const [message, setMessage] = useState('');
+    const navigate = useNavigate(); // Initialize useNavigate
 
     const handleLogin = (e) => {
         e.preventDefault();
-        // Accept any username and password for now
+        // Backend calls for login
         onLoginSuccess();
         setMessage('');
+    };
+
+    const handleRegister = () => {
+        navigate('/register'); // Navigate to registration form
     };
 
     return (
@@ -36,6 +42,7 @@ function Login({ onLoginSuccess }) {
                 <button type="submit">Login</button>
             </form>
             {message && <p>{message}</p>}
+            <button onClick={handleRegister}>New User Registration</button> {/* Register button */}
         </div>
     );
 }
