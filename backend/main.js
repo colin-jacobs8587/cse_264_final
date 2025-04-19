@@ -58,6 +58,48 @@ const query = async (text, values) => {
 
 const userTable = "lychee_users";
 
+// Routes
+// Registration route
+app.post("/api/register", async (req, res) => {
+  const { email, password, subscriptionStatus } = req.body;
+
+  // Validate required fields
+  if (!email || !password) {
+    console.log("[REGISTER] Error: Missing email or password.");
+    return res.status(400).json({ error: "Email and password are required." });
+  }
+
+  // Existing (already registered) users validation
+  try {
+    const checkSql = `select * from ${userTable} where email = $1`;
+    const { rows: existing } = await query(checkSql, [email]);
+    if (existing.length) {
+      console.log("[REGISTER] Error: User already registered.");
+      return res.status(400).json({ error: "User already registered" });
+    }
+
+    // Once validated, hash pw and insert user
+    const hashed = await bcrypt.hash(password, 10);
+    const insertSql = `
+        insert into ${userTable} (email, password_hash, subscription_status)
+        values ($1, $2, $3)
+        returning id, email, subscription_status, created_at
+    `;
+    const { rows: [newUser] } = await query(insertSql, [
+      email,
+      hashed,
+      subscriptionStatus
+    ]);
+
+    // Success response
+    res.status(201).json({ user: newUser });
+
+  } catch (error) {
+    console.error("[REGISTER] Error in Express route:", error);
+    res.status(500).json({ error: "Error processing registration." });
+  }
+});
+
 // Summarize route
 app.post("/api/summarize", async (req, res) => {
   const { url } = req.body;
