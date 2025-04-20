@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 
 function SentimentForm() {
     const [url, setUrl] = useState('');
@@ -15,8 +15,8 @@ function SentimentForm() {
         try {
             const response = await fetch('http://localhost:5000/api/sentiment', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url }),
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({url}),
                 credentials: 'include'
             });
 
@@ -57,7 +57,7 @@ function SentimentForm() {
                 <div>
                     <h3>Sentiment</h3>
                     <p>
-                        <strong>Label:</strong> {sentimentLabel} <br />
+                        <strong>Label:</strong> {sentimentLabel} <br/>
                         <strong>Score:</strong> {sentimentScore}
                     </p>
                 </div>

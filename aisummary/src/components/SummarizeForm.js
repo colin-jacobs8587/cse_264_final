@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 
 function SummarizeForm() {
     const [url, setUrl] = useState('');
@@ -13,8 +13,8 @@ function SummarizeForm() {
         try {
             const response = await fetch('http://localhost:5000/api/summarize', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ url }),
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({url}),
                 credentials: 'include'
             });
 
