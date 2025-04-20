@@ -88,6 +88,39 @@ function authRequired(req, res, next) {
 }
 
 // Routes
+// Login route
+app.post("/api/login", async (req, res) => {
+    const {email, password} = req.body;
+    if (!email || !password)
+        return res.status(400).json({error: "Email and password are required."});
+
+    try {
+        // Query for user in db
+        const sql = `select id, email, password_hash, subscription_status
+                     from ${userTable}
+                     where email = $1`;
+        const {rows: [user]} = await query(sql, [email]);
+        // If user not found or pw don't match
+        if (!user || !(await bcrypt.compare(password, user.password_hash))) {
+            return res.status(400).json({error: "Invalid credentials."});
+        }
+
+        // Sign jwt token with user info that expires in 1h
+        const payload = {id: user.id, email: user.email, subStatus: user.subscription_status};
+        const token = jwt.sign(payload, JWT_SECRET, {expiresIn: "1h"});
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "lax",
+            maxAge: 60 * 60 * 1000 // 1h
+        });
+        res.json({message: "Logged in", user: payload});
+    } catch (err) {
+        console.error("[LOGIN] Error:", err);
+        res.status(500).json({error: "Error logging in."});
+    }
+});
+
 // Registration route
 app.post("/api/register", async (req, res) => {
     const {email, password, subscriptionStatus} = req.body;
