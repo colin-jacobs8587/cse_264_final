@@ -36,3 +36,39 @@
     transform: rotate(360deg);
   }
 }
+
+.restricted-tab {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transition: 0.2s;
+}
+
+.restricted-tab:hover {
+  opacity: 0.6;
+}
+
+.toast {
+  position: fixed;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: darkslategray;
+  color: white;
+  padding: 8px 14px;
+  border-radius: 4px;
+  font-size: 13px;
+  opacity: 0;
+  animation: fade 3s forwards;
+}
+
+@keyframes fade {
+  10% {
+    opacity: 1;
+  }
+  90% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
