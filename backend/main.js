@@ -7,10 +7,17 @@ const {MongoClient} = require("mongodb");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const pg = require("pg");
+const cookieParser = require("cookie-parser");
 
 // Express Setup
 const app = express();
-app.use(cors());
+app.use(cookieParser());
+app.use(
+    cors({
+        origin: "http://localhost:3000",  // React server
+        credentials: true
+    })
+);
 app.use(express.json());
 
 // Initialize Redis client
@@ -58,6 +65,28 @@ const query = async (text, values) => {
 
 const userTable = "lychee_users";
 
+// Auth helper
+const JWT_SECRET = process.env.JWT_SECRET
+
+function authRequired(req, res, next) {
+    const route = `[${req.method}] ${req.originalUrl}`;     // Logging purposes
+    const token = req.cookies.token;
+    // Missing token in request
+    if (!token) {
+        console.warn(`[AUTH] No cookie on ${route}`);
+        return res.status(401).json({error: "Not authenticated"});
+    }
+    // Verify token
+    try {
+        req.user = jwt.verify(token, JWT_SECRET);
+        console.info(`[AUTH] OK user=${req.user.id} email=${req.user.email} route=${route}`);
+        next();
+    } catch (err) {
+        console.error(`[AUTH] Invalid token on ${route}: ${err.name} – ${err.message}`);
+        return res.status(401).json({error: "Invalid or expired token"});
+    }
+}
+
 // Routes
 // Registration route
 app.post("/api/register", async (req, res) => {
@@ -102,7 +131,7 @@ app.post("/api/register", async (req, res) => {
 });
 
 // Summarize route
-app.post("/api/summarize", async (req, res) => {
+app.post("/api/summarize", authRequired, async (req, res) => {
     const {url} = req.body;
     console.log("[SUMMARIZE] Received request for URL:", url);
 
@@ -167,7 +196,7 @@ app.post("/api/summarize", async (req, res) => {
 });
 
 // Sentiment route
-app.post("/api/sentiment", async (req, res) => {
+app.post("/api/sentiment", authRequired, async (req, res) => {
     const {url} = req.body;
     const cacheKey = `${url}`;
 
@@ -228,7 +257,7 @@ app.post("/api/sentiment", async (req, res) => {
 });
 
 // Classification route
-app.post("/api/classify", async (req, res) => {
+app.post("/api/classify", authRequired, async (req, res) => {
     const {url} = req.body;
     console.log("[CLASSIFY] Received request for URL:", url);
     const cacheKey = `${url}`;
