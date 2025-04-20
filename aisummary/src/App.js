@@ -1,4 +1,4 @@
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 import Login from './components/Login';
 import Register from './components/Register';
@@ -32,6 +32,12 @@ function App() {
                 >
                     Classify
                 </button>
+                <button onClick={async () => {
+                    await fetch("http://localhost:5000/api/logout", {method: "POST", credentials: "include"});
+                    setIsLoggedIn(false);
+                }}>
+                    Logout
+                </button>
             </nav>
             <div className="form-container">
                 {activeTab === 'summarize' && <SummarizeForm/>}
@@ -40,6 +46,13 @@ function App() {
             </div>
         </>
     );
+    // Hit /api/me to validate jwt to update isLoggedIn
+    useEffect(() => {
+        fetch("http://localhost:5000/api/me", {credentials: "include"})
+            .then(r => r.json())
+            .then(d => setIsLoggedIn(d.loggedIn))
+            .catch(() => setIsLoggedIn(false));
+    }, []);
 
     return (
         <Router>
@@ -49,6 +62,7 @@ function App() {
                         path="/register"
                         element={<Register/>}
                     />
+                    {/* Root: If not logged in, show login page. If logged in, show app */}
                     <Route
                         path="/"
                         element={
