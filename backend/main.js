@@ -121,6 +121,22 @@ app.post("/api/login", async (req, res) => {
     }
 });
 
+// Logout route
+app.post("/api/logout", (req, res) => {
+    res.clearCookie("token", {sameSite: "lax"});
+    res.json({message: "Logged out."});
+});
+
+// Session check route
+app.get("/api/me", (req, res) => {
+    try {
+        const user = jwt.verify(req.cookies.token, JWT_SECRET); // Verify and decode JWT
+        res.json({loggedIn: true, user});
+    } catch {
+        res.json({loggedIn: false});
+    }
+});
+
 // Registration route
 app.post("/api/register", async (req, res) => {
     const {email, password, subscriptionStatus} = req.body;
