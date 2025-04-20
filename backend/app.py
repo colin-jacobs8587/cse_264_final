@@ -1,9 +1,6 @@
 from flask import Flask, request, jsonify
-import requests
-from bs4 import BeautifulSoup
 from transformers import pipeline
 import logging
-from boilerpy3 import extractors
 import newspaper
 import redis
 from pymongo.mongo_client import MongoClient
