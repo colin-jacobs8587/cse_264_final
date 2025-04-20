@@ -1,7 +1,7 @@
 transformers
 beautifulsoup4
 boilerpy3
-newspaper3k
+tensorflow
 redis
 pymongo
 python-dotenv
