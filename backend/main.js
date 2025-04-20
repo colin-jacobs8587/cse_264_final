@@ -87,6 +87,16 @@ function authRequired(req, res, next) {
     }
 }
 
+// Paid subscription check helper fn
+function paidRequired(req, res, next) {
+    const isPaid = req.user.subStatus === true;
+    if (!isPaid) {
+        console.warn(`[PLAN] User ${req.user.id} tried to access paid endpoint.`);
+        return res.status(403).json({ error: "Paid plan required" });
+    }
+    next();
+}
+
 // Routes
 // Login route
 app.post("/api/login", async (req, res) => {
@@ -245,7 +255,7 @@ app.post("/api/summarize", authRequired, async (req, res) => {
 });
 
 // Sentiment route
-app.post("/api/sentiment", authRequired, async (req, res) => {
+app.post("/api/sentiment", paidRequired,  authRequired, async (req, res) => {
     const {url} = req.body;
     const cacheKey = `${url}`;
 
@@ -306,7 +316,7 @@ app.post("/api/sentiment", authRequired, async (req, res) => {
 });
 
 // Classification route
-app.post("/api/classify", authRequired, async (req, res) => {
+app.post("/api/classify", paidRequired, authRequired, async (req, res) => {
     const {url} = req.body;
     console.log("[CLASSIFY] Received request for URL:", url);
     const cacheKey = `${url}`;
