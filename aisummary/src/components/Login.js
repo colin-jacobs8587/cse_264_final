@@ -6,11 +6,22 @@ function Login({onLoginSuccess}) {
     const [message, setMessage] = useState('');
     const navigate = useNavigate(); // Initialize useNavigate
 
-    const handleLogin = (e) => {
+    const handleLogin = async (e) => {
         e.preventDefault();
-        // Backend calls for login
-        onLoginSuccess();
-        setMessage('');
+        setMessage("Logging in…");
+        try {
+            const res = await fetch("http://localhost:5000/api/login", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({email: loginCredentials.username, password: loginCredentials.password}),
+                credentials: "include"
+            });
+            const data = await res.json();
+            if (!res.ok) return setMessage(data.error);
+            onLoginSuccess();
+        } catch (err) {
+            setMessage("Server error");
+        }
     };
 
     const handleRegister = () => {
@@ -42,8 +53,8 @@ function Login({onLoginSuccess}) {
                 <button type="submit">Login</button>
             </form>
             {message && <p>{message}</p>}
-            <button onClick={handleRegister}>New User Registration</button>
             {/* Register button */}
+            <button onClick={handleRegister}>New User Registration</button>
         </div>
     );
 }
