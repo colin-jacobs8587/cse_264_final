@@ -209,7 +209,7 @@ def sentiment():
     logging.debug(f"[SENTIMENT] Received URL: {url}")
     try:
         text = extract_text_with_newspaper(url)
-        print(text)
+        #print(text)
         redis_client.set(url, text)
         short_text = text[:2000]
         sentiment_result = sentiment_analyzer(short_text, truncation=True)
