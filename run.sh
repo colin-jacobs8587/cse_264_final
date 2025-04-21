@@ -2,40 +2,63 @@
 
 # Function to cleanup background processes when Ctrl+C is pressed
 cleanup() {
-    echo "Terminating processes on ports 3000, 5000, and 5001..."
+    echo "TERMINATING PROCESSES ON PORTS 3000, 5000, AND 5001..."
     for port in 3000 5000 5001; do
-        # Get all process IDs listening on the port
         pids=$(lsof -ti :$port)
         if [ -n "$pids" ]; then
-            echo "Killing processes on port $port: $pids"
+            echo "KILLING PROCESSES ON PORT $port: $pids"
             kill -9 $pids
         else
-            echo "No processes found on port $port."
+            echo "NO PROCESSES FOUND ON PORT $port."
         fi
     done
     exit 0
 }
 
-# Trap SIGINT (Ctrl+C) and SIGTERM signals to run the cleanup function
 trap cleanup SIGINT SIGTERM
 
-# 1. Go into the aisummary folder
-cd /c/Users/nhi58/OneDrive/Desktop/CSE264/cse_264_final/aisummary || exit
+# Detect script directory
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# 2. Start the frontend in the background
-npm start &
-frontend_pid=$!
+# Backend setup
+echo "STARTING BACKEND SETUP..."
+cd "$SCRIPT_DIR/backend" || exit
+echo "INSTALLING BACKEND DEPENDENCIES..."
+npm install
+pip install -r requirements.txt
 
-# 3. Go into the backend folder
-cd /c/Users/nhi58/OneDrive/Desktop/CSE264/cse_264_final/backend || exit
-
-# 4. Start the Python backend in the background
-python app.py &
+# Start python backend
+echo "STARTING PYTHON BACKEND..."
+if [[ "$OSTYPE" == "darwin"* ]]; then
+    python3 app.py &
+else
+    python app.py &
+fi
 python_pid=$!
 
-# 5. Start the Node.js server in the background
+# Start node server
+echo "STARTING NODE.JS SERVER..."
 node main.js &
 node_pid=$!
 
-# 6. Wait for all background jobs to finish
+# Wait for python backend
+echo "WAITING FOR PYTHON BACKEND TO START..."
+until curl -s http://127.0.0.1:5001 >/dev/null; do
+    echo "STILL WAITING..."
+    sleep 1
+done
+echo "PYTHON BACKEND IS UP!"
+
+# Frontend setup
+echo "STARTING FRONTEND SETUP..."
+cd "$SCRIPT_DIR/aisummary" || exit
+echo "INSTALLING FRONTEND DEPENDENCIES..."
+npm install
+
+# Start frontend
+echo "STARTING FRONTEND..."
+npm start &
+frontend_pid=$!
+
+# Wait for all background jobs to finish
 wait

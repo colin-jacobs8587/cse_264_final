@@ -47,7 +47,7 @@ function Register() {
             }
         } catch (error) {
             console.error('[Register] Error: ', error);
-            setMessage('Registration Error: Unexpected error.');
+            setMessage('Server error');
         }
     };
 

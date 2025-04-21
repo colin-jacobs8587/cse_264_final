@@ -65,9 +65,16 @@ const query = async (text, values) => {
 
 const userTable = "lychee_users";
 
-// Auth helper
+// JWT setup and helper fns
 const JWT_SECRET = process.env.JWT_SECRET
+const JWT_EXPIRES_IN = "1h"
+const cookieOptions = {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax"
+};
 
+// Auth helper
 function authRequired(req, res, next) {
     const route = `[${req.method}] ${req.originalUrl}`;     // Logging purposes
     const token = req.cookies.token;
@@ -87,12 +94,22 @@ function authRequired(req, res, next) {
     }
 }
 
+// Token creation helper
+function createToken(user) {
+    const payload = {
+        id: user.id,
+        email: user.email,
+        subStatus: user.subscription_status
+    };
+    return jwt.sign(payload, JWT_SECRET, { expiresIn: JWT_EXPIRES_IN });
+}
+
 // Paid subscription check helper fn
 function paidRequired(req, res, next) {
     const isPaid = req.user.subStatus === true;
     if (!isPaid) {
         console.warn(`[PLAN] User ${req.user.id} tried to access paid endpoint.`);
-        return res.status(403).json({ error: "Paid plan required" });
+        return res.status(403).json({error: "Paid plan required"});
     }
     next();
 }
@@ -100,9 +117,9 @@ function paidRequired(req, res, next) {
 // Routes
 // Login route
 app.post("/api/login", async (req, res) => {
-    const {email, password} = req.body;
+    const { email, password } = req.body;
     if (!email || !password)
-        return res.status(400).json({error: "Email and password are required."});
+        return res.status(400).json({ error: "Email and password are required." });
 
     try {
         // Query for user in db
@@ -115,18 +132,13 @@ app.post("/api/login", async (req, res) => {
             return res.status(400).json({error: "Invalid credentials."});
         }
 
-        // Sign jwt token with user info that expires in 1h
-        const payload = {id: user.id, email: user.email, subStatus: user.subscription_status};
-        const token = jwt.sign(payload, JWT_SECRET, {expiresIn: "1h"});
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: false, // TO DO: True for prod
-            sameSite: "lax",
-        });
-        res.json({message: "Logged in", user: payload});
+        const token = createToken(user);
+        res.cookie("token", token, cookieOptions);
+
+        res.json({ message: "Logged in", user });
     } catch (err) {
         console.error("[LOGIN] Error:", err);
-        res.status(500).json({error: "Error logging in."});
+        res.status(500).json({ error: "Error logging in." });
     }
 });
 
@@ -189,15 +201,18 @@ app.post("/api/register", async (req, res) => {
 
 // Subscription update route
 app.patch("/api/subscription", authRequired, async (req, res) => {
-    const {newStatus} = req.body;
+    const { newStatus } = req.body;
 
-    // Query to update subscription_status with the newStatus
     try {
         const sql = `
             update ${userTable}
             set subscription_status = $1
             where id = $2 returning id, email, subscription_status, created_at`
         const {rows: [updatedUsr]} = await query(sql, [newStatus, req.user.id]);
+
+        const newToken = createToken(updatedUsr);
+        res.cookie("token", newToken, cookieOptions);
+
         res.json({user: updatedUsr});
     } catch (err) {
         console.error("[SUBSCRIPTION] Error: ", err);
