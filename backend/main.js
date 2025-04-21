@@ -309,6 +309,7 @@ app.post("/api/summarize", authRequired, async (req, res) => {
 });
 
 // Sentiment route
+// authRequired sets req.user by decoding JWT and paidRequired reads req.user.subStatus
 app.post("/api/sentiment", authRequired, paidRequired, async (req, res) => {
     const {url} = req.body;
     const cacheKey = `${url}`;
@@ -370,6 +371,7 @@ app.post("/api/sentiment", authRequired, paidRequired, async (req, res) => {
 });
 
 // Classification route
+// authRequired sets req.user by decoding JWT and paidRequired reads req.user.subStatus
 app.post("/api/classify", authRequired, paidRequired, async (req, res) => {
     const {url} = req.body;
     console.log("[CLASSIFY] Received request for URL:", url);
