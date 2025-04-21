@@ -120,7 +120,7 @@ app.post("/api/login", async (req, res) => {
         const token = jwt.sign(payload, JWT_SECRET, {expiresIn: "1h"});
         res.cookie("token", token, {
             httpOnly: true,
-            secure: false, // True for prod
+            secure: false, // TO DO: True for prod
             sameSite: "lax",
         });
         res.json({message: "Logged in", user: payload});
