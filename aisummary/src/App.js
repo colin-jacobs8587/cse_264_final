@@ -5,6 +5,7 @@ import Register from './components/Register';
 import SummarizeForm from './components/SummarizeForm';
 import SentimentForm from './components/SentimentForm';
 import ClassifyForm from './components/ClassifyForm';
+import Profile from './components/Profile';
 import './App.css';
 
 function App() {
@@ -50,6 +51,13 @@ function App() {
                 >
                     Classify
                 </button>
+                {/* Tab: Profile */}
+                <button
+                    className={activeTab === 'profile' ? 'active' : ''}
+                    onClick={() => setActiveTab('profile')}
+                >
+                    Profile
+                </button>
                 {/* Logout button */}
                 <button onClick={async () => {
                     await fetch("http://localhost:5000/api/logout", {
@@ -66,6 +74,7 @@ function App() {
                 {activeTab === 'summarize' && <SummarizeForm/>}
                 {activeTab === 'sentiment' && <SentimentForm/>}
                 {activeTab === 'classify' && <ClassifyForm/>}
+                {activeTab === 'profile' && <Profile isPaid={isPaid} setIsPaid={setIsPaid} />}
             </div>
         </>
     );
