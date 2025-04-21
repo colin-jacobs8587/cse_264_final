@@ -120,9 +120,8 @@ app.post("/api/login", async (req, res) => {
         const token = jwt.sign(payload, JWT_SECRET, {expiresIn: "1h"});
         res.cookie("token", token, {
             httpOnly: true,
-            secure: true,
+            secure: false, // True for prod
             sameSite: "lax",
-            maxAge: 60 * 60 * 1000 // 1h
         });
         res.json({message: "Logged in", user: payload});
     } catch (err) {
@@ -182,10 +181,65 @@ app.post("/api/register", async (req, res) => {
 
         // Success response
         res.status(201).json({user: newUser});
-
     } catch (error) {
         console.error("[REGISTER] Error in Express route:", error);
         res.status(500).json({error: "Error processing registration."});
+    }
+});
+
+// Subscription update route
+app.patch("/api/subscription", authRequired, async (req, res) => {
+    const {newStatus} = req.body;
+
+    // Query to update subscription_status with the newStatus
+    try {
+        const sql = `
+            update ${userTable}
+            set subscription_status = $1
+            where id = $2 returning id, email, subscription_status, created_at`
+        const {rows: [updatedUsr]} = await query(sql, [newStatus, req.user.id]);
+        res.json({user: updatedUsr});
+    } catch (err) {
+        console.error("[SUBSCRIPTION] Error: ", err);
+        res.status(500).json({error: "Error updating subscription."});
+    }
+});
+
+// Password update route
+app.patch("/api/password", authRequired, async (req, res) => {
+    const {currentPassword, newPassword} = req.body;
+
+    if (!currentPassword || !newPassword) {
+        return res.status(400).json({error: "Both current and new password fields are required."});
+    }
+
+    try {
+        // Query for current pw hash
+        const sql = `
+            select password_hash
+            from ${userTable}
+            where id = $1`;
+        const {rows: [user]} = await query(sql, [req.user.id]);
+
+        // Validate current pw
+        const match = await bcrypt.compare(currentPassword, user.password_hash);
+        if (!match) {
+            return res.status(403).json({error: "Incorrect current password."});
+        }
+
+        // Hash up the new pw
+        const hashed = await bcrypt.hash(newPassword, 10);
+        // Insert new pw hash into db
+        const updateSql = `
+            update ${userTable}
+            set password_hash = $1
+            where id = $2 returning id, email, subscription_status, created_at
+        `;
+        const {rows: [updatedUsr]} = await query(updateSql, [hashed, req.user.id]);
+        res.json({user: updatedUsr});
+    } catch (err) {
+        console.error("[PASSWORD] Error:", err);
+        res.status(500).json({error: "Error updating password."});
     }
 });
 
@@ -255,7 +309,7 @@ app.post("/api/summarize", authRequired, async (req, res) => {
 });
 
 // Sentiment route
-app.post("/api/sentiment", paidRequired,  authRequired, async (req, res) => {
+app.post("/api/sentiment", paidRequired, authRequired, async (req, res) => {
     const {url} = req.body;
     const cacheKey = `${url}`;
 
