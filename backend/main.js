@@ -309,7 +309,7 @@ app.post("/api/summarize", authRequired, async (req, res) => {
 });
 
 // Sentiment route
-app.post("/api/sentiment", paidRequired, authRequired, async (req, res) => {
+app.post("/api/sentiment", authRequired, paidRequired, async (req, res) => {
     const {url} = req.body;
     const cacheKey = `${url}`;
 
@@ -370,7 +370,7 @@ app.post("/api/sentiment", paidRequired, authRequired, async (req, res) => {
 });
 
 // Classification route
-app.post("/api/classify", paidRequired, authRequired, async (req, res) => {
+app.post("/api/classify", authRequired, paidRequired, async (req, res) => {
     const {url} = req.body;
     console.log("[CLASSIFY] Received request for URL:", url);
     const cacheKey = `${url}`;
