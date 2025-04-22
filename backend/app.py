@@ -75,18 +75,6 @@ def classify():
         # Run text classification using the AG News model.
         classification_result = classifier(truncated_text, truncation=True)
 
-        # model returns labels 
-        label_mapping = {
-            "LABEL_0": "World",
-            "LABEL_1": "Sports",
-            "LABEL_2": "Business",
-            "LABEL_3": "Sci/Tech"
-        }
-
-        # Remap the labels in the classification result.
-        for result in classification_result:
-            result['label'] = label_mapping.get(result['label'], result['label'])
-
         logging.debug(f"[CLASSIFY] Classification result: {classification_result}")
 
         return jsonify(classification_result)
@@ -109,18 +97,6 @@ def classify_cached():
 
         # Run text classification using the AG News model.
         classification_result = classifier(truncated_text, truncation=True)
-
-        # model returns labels 
-        label_mapping = {
-            "LABEL_0": "World",
-            "LABEL_1": "Sports",
-            "LABEL_2": "Business",
-            "LABEL_3": "Sci/Tech"
-        }
-
-        # Remap the labels in the classification result.
-        for result in classification_result:
-            result['label'] = label_mapping.get(result['label'], result['label'])
 
         logging.debug(f"[CLASSIFY] Classification result: {classification_result}")
 
