@@ -48,8 +48,8 @@ sentiment_analyzer = pipeline("sentiment-analysis")
 logging.debug("Sentiment analysis model loaded.")
 
 
-classifier = pipeline("text-classification", model="textattack/distilbert-base-uncased-ag-news")
-logging.debug("AG News classifier model loaded.")
+classifier = pipeline("text-classification", model="ilsilfverskiold/classify-news-category-iptc")
+logging.debug("News classifier model loaded.")
 
 def extract_text_with_newspaper(url):
     article = newspaper.Article(url, language='en')
