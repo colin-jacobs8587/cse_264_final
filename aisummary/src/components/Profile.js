@@ -1,5 +1,5 @@
 import React, {useEffect, useState} from 'react';
-
+import '../styling/Profile.css';
 function Profile({isPaid, setIsPaid}) {
     // Track subscription toggle msg
     const [subscriptionMsg, setSubscriptionMsg] = useState('');

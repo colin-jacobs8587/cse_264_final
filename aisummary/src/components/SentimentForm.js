@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import '../styling/Sentiment.css'
 
 function SentimentForm() {
     const [url, setUrl] = useState('');

@@ -1,7 +1,6 @@
 transformers
 beautifulsoup4
 boilerpy3
-tensorflow
 newspaper3k
 redis
 pymongo

@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import '../styling/Summarize.css'
 
 function SummarizeForm() {
     const [url, setUrl] = useState('');

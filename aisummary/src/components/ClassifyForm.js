@@ -1,4 +1,5 @@
 import React, {useState} from 'react';
+import '../styling/Classify.css'
 
 function ClassifyForm() {
     const [url, setUrl] = useState('');

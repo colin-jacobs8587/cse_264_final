@@ -1,5 +1,6 @@
 import React, {useState} from 'react';
 import {useNavigate} from 'react-router-dom';
+import '../styling/Login.css';
 
 function Login({onLoginSuccess}) {
     const [loginCredentials, setLoginCredentials] = useState({username: '', password: ''});
