@@ -1,5 +1,13 @@
 import React, {useEffect, useState} from 'react';
-import '../styling/Profile.css';
+import './styling/Profile.css';
+import {
+  PROFILE,
+  HELLO,
+  CURRENT_PLAN,
+  CHANGE_PASSWORD,
+  UPDATE_PASSWORD
+} from "./Constants/Constants";
+
 function Profile({isPaid, setIsPaid}) {
     // Track subscription toggle msg
     const [subscriptionMsg, setSubscriptionMsg] = useState('');
@@ -59,45 +67,57 @@ function Profile({isPaid, setIsPaid}) {
     };
 
     return (
-        <div className="profile-container">
-            <h2>Profile</h2>
-            {email && <p>Hello, {email}</p>}
-            {/* Change subscription */}
-            <div className="profile-section">
-                <p>Current Plan: {isPaid ? 'Paid ✅' : 'Free ❌'}</p>
-                <button onClick={handleSubscription}>
-                    {isPaid ? 'Downgrade to Free' : 'Upgrade to Paid'}
-                </button>
-                {subscriptionMsg && <p>{subscriptionMsg}</p>}
-            </div>
-
-            {/* Change password */}
-            <div className="profile-section">
-                <h3>Change Password</h3>
-                <form onSubmit={handlePassword}>
-                    <input
-                        type="password"
-                        placeholder="Current Password"
-                        value={passwordFields.currentPassword}
-                        onChange={(e) =>
-                            setPasswordFields({...passwordFields, currentPassword: e.target.value})
-                        }
-                        required
-                    />
-                    <input
-                        type="password"
-                        placeholder="New Password"
-                        value={passwordFields.newPassword}
-                        onChange={(e) =>
-                            setPasswordFields({...passwordFields, newPassword: e.target.value})
-                        }
-                        required
-                    />
-                    <button type="submit">Update Password</button>
-                </form>
-                {passwordMsg && <p>{passwordMsg}</p>}
-            </div>
+      <div className="profile-container">
+        <h2>{PROFILE}</h2>
+        {email && (
+          <p>
+            {HELLO} {email}
+          </p>
+        )}
+        {/* Change subscription */}
+        <div className="profile-section">
+          <p>
+            {CURRENT_PLAN} {isPaid ? "Paid ✅" : "Free ❌"}
+          </p>
+          <button onClick={handleSubscription}>
+            {isPaid ? "Downgrade to Free" : "Upgrade to Paid"}
+          </button>
+          {subscriptionMsg && <p>{subscriptionMsg}</p>}
         </div>
+
+        {/* Change password */}
+        <div className="profile-section">
+          <h3>{CHANGE_PASSWORD}</h3>
+          <form onSubmit={handlePassword}>
+            <input
+              type="password"
+              placeholder="Current Password"
+              value={passwordFields.currentPassword}
+              onChange={(e) =>
+                setPasswordFields({
+                  ...passwordFields,
+                  currentPassword: e.target.value,
+                })
+              }
+              required
+            />
+            <input
+              type="password"
+              placeholder="New Password"
+              value={passwordFields.newPassword}
+              onChange={(e) =>
+                setPasswordFields({
+                  ...passwordFields,
+                  newPassword: e.target.value,
+                })
+              }
+              required
+            />
+            <button type="submit">{UPDATE_PASSWORD}</button>
+          </form>
+          {passwordMsg && <p>{passwordMsg}</p>}
+        </div>
+      </div>
     );
 }
 

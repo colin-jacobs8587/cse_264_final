@@ -1,74 +1,168 @@
-.App {
-  text-align: center;
+/* ==============================
+   Fixed Top Navbar (no bullets)
+   ============================== */
+
+body {
+  /* leave space for the fixed nav */
+  padding-top: 60px;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #ae2764;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  z-index: 1000;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.nav-buttons {
   display: flex;
-  flex-direction: column;
-  align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.5rem 1rem;
 }
 
-.App-link {
-  color: #61dafb;
+.nav-buttons button {
+  /* reuse your sentiment form button styles */
+  padding: 12px 24px;
+  background-color: #ae2764;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.3s;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.nav-buttons button:hover {
+  background-color: #650431;
+  transform: translateY(-3px);
 }
 
-.restricted-tab {
+.nav-buttons button.active {
+  background-color: #50023f;
+}
+
+.nav-buttons button.restricted-tab {
   opacity: 0.4;
   cursor: not-allowed;
-  transition: 0.2s;
 }
 
-.restricted-tab:hover {
+.nav-buttons button.restricted-tab:hover {
   opacity: 0.6;
 }
 
-.toast {
-  position: fixed;
-  top: 40%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  background: darkslategray;
-  color: white;
-  padding: 8px 14px;
-  border-radius: 4px;
-  font-size: 13px;
-  opacity: 0;
-  animation: fade 3s forwards;
+/* separate logout if you want it styled differently */
+.nav-buttons button.logout {
+  margin-left: 2rem;
 }
 
-@keyframes fade {
-  10% {
-    opacity: 1;
-  }
-  90% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-  }
+/* Styling for the SummarizeForm */
+.form {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+
+  /* enforce at least 400×400 */
+  min-width: 400px;
+  min-height: 400px;
+
+  /* your responsive sizing */
+  width: 50%;
+  height: 50%;
+
+  padding: 30px;
+  background-color: #f4f4f9;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Title of the summarize form */
+.form h2 {
+  font-size: 32px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 20px;
+  color: #333;
+}
+
+/* Text box for URL */
+.form input {
+  width: 100%;
+  padding: 12px;
+  margin: 10px 0;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-size: 16px;
+  text-align: center;
+  background-color: #ffffff;
+  box-sizing: border-box;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+/* Focus effect on input field */
+.form input:focus {
+  border-color: #3498db;
+  box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+}
+
+/* Button styling */
+.form button {
+  display: block;
+  padding: 12px 24px !important;
+  background-color: #ae2764;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+  margin: 10px 0 !important; 
+  transition: background-color 0.3s, transform 0.3s;
+}
+
+/* Button hover effect */
+.form button:hover {
+  background-color: #650431;
+  transform: translateY(-3px);
+}
+
+/* Styling for summary results */
+.form pre {
+  background-color: #f8f8f8;
+  padding: 20px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: 'Courier New', Courier, monospace;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  margin-top: 20px;
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+/* Styling for message (success or error) */
+.form p {
+  text-align: center;
+  font-size: 14px;
+  color: #5f4fd9;
+  margin-top: 10px;
+}
+
+/* Styling for summary section */
+.form h3 {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin-top: 20px;
 }

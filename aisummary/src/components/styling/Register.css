@@ -59,37 +59,3 @@
     /* Slight lift effect */
 }
 
-/* Orb effect for successful registration */
-.orb {
-    animation: spin 3s linear infinite;
-    width: 300px;
-    height: 300px;
-    margin: 20px auto;
-    border-radius: 50%;
-    /* Perfect circle */
-    background-color: #cadae5;
-    /* Light, pastel color */
-    box-shadow:
-        inset 0 0 50px #fff,
-        /* Inner white glow */
-        inset 20px 0 60px white,
-        /* Inner white glow with depth */
-        inset -20px 0 60px rgb(242, 101, 216),
-        /* Lychee-inspired pink */
-        inset 20px 0 300px rgb(155, 33, 151),
-        /* Darker purple-pink shade */
-        inset -20px 0 300px rgb(56, 168, 178),
-        0 0 50px #fff,
-        /* Outer white glow */
-        -10px 0 60px rgb(136, 219, 226),
-        /* Soft green */
-        10px 0 60px rgb(199, 222, 218);
-    /* Soft blue for a gradient effect */
-}
-
-/* Keyframes for the orb spin effect */
-@keyframes spin {
-    100% {
-        transform: rotate(360deg);
-    }
-}
