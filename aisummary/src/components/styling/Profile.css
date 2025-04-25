@@ -1,0 +1,102 @@
+/* src/styling/Profile.css */
+
+/* Container for Profile */
+.profile-container {
+    max-width: 600px;
+    margin: 50px auto;
+    padding: 30px;
+    background-color: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/*the word Profile*/
+.profile-container h2 {
+    font-size: 32px;
+    font-weight: bold;
+    text-align: center;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.profile-container p {
+    font-size: 18px;
+    color: #666;
+    text-align: center;
+    margin-top: 10px;
+}
+
+/* Profile Section (Subscription) box*/
+.profile-section {
+    margin-bottom: 40px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+
+.profile-section button {
+    padding: 12px 24px;
+    background-color: #ae2764;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s, transform 0.3s;
+    margin-top: 15px;
+}
+
+.profile-section button:hover {
+    background-color: #650431;
+    transform: translateY(-3px);
+    /* Slight lift effect */
+}
+
+/* Change Password Section box */
+.profile-section form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+}
+
+.profile-section input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.3s, box-shadow 0.3s;
+}
+
+
+.profile-section button[type="submit"] {
+    padding: 12px 24px;
+    background-color: #ae2764;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s, transform 0.3s;
+    margin-top: 15px;
+}
+
+.profile-section button[type="submit"]:hover {
+    background-color: #650431;
+    transform: translateY(-3px);
+    /* Slight lift effect */
+}
+
+.profile-section .password-msg {
+    font-size: 14px;
+    color: #e74c3c;
+    margin-top: 10px;
+    text-align: center;
+}
