@@ -19,7 +19,7 @@ function Login({onLoginSuccess}) {
             });
             const data = await res.json();
             if (!res.ok) return setMessage(data.error);
-            onLoginSuccess();
+            onLoginSuccess(data.user?.subscription_status);
         } catch (err) {
             setMessage("Server error");
         }
