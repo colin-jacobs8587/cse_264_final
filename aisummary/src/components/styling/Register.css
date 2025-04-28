@@ -1,6 +1,6 @@
 /* src/styling/Register.css */
 
-/* the box */
+/* Container */
 .register-container {
     max-width: 400px;
     margin: 50px auto;
@@ -9,14 +9,14 @@
     border-radius: 12px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+
+    /* center direct children and wrap column */
     display: flex;
     flex-direction: column;
-    justify-content: center;
     align-items: center;
-    height: 400px;
 }
 
-/*Word Register*/
+/* Title */
 .register-container h2 {
     font-size: 28px;
     font-weight: bold;
@@ -25,12 +25,18 @@
     color: #333;
 }
 
+/* Form layout */
 .register-container form {
     display: flex;
     flex-direction: column;
+    width: 100%;
+    align-items: center;
+    /* centers label & buttons */
 }
 
-.register-container input {
+/* Text & password inputs */
+.register-container input[type="email"],
+.register-container input[type="password"] {
     width: 100%;
     padding: 10px;
     margin: 10px 0;
@@ -39,10 +45,30 @@
     font-size: 16px;
     text-align: center;
     background-color: #ffffff;
+    box-sizing: border-box;
 }
 
+/* Checkbox sizing */
+.register-container input[type="checkbox"] {
+    width: auto;
+    margin-left: 8px;
+    transform: scale(1.2);
+}
+
+/* Label around checkbox and text */
+.register-container form label {
+    display: inline-flex;
+    align-items: center;
+    margin: 10px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+/* Buttons (both inside form & the one below) */
 .register-container button {
-    padding: 12px 45px;
+    width: 100%;
+    max-width: 100%;
+    padding: 12px 0;
     background-color: #c94a9f;
     color: white;
     border: none;
@@ -50,12 +76,19 @@
     cursor: pointer;
     font-size: 16px;
     margin: 10px 0;
+    box-sizing: border-box;
     transition: background-color 0.3s, transform 0.3s;
 }
 
+/* Hover effect */
 .register-container button:hover {
     background-color: #f0a5e1;
     transform: translateY(-3px);
-    /* Slight lift effect */
 }
 
+/* Error / info message */
+.register-container .message {
+    text-align: center;
+    color: #e74c3c;
+    margin-top: 10px;
+}
