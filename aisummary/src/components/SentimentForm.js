@@ -20,8 +20,8 @@ function SentimentForm() {
   const handleSentiment = async (e) => {
     e.preventDefault();
 
-    // only show spinner if request takes >500ms
-    const loaderTimer = setTimeout(() => setLoading(true), 500);
+    // only show spinner if request takes >600ms
+    const loaderTimer = setTimeout(() => setLoading(true), 600);
 
     setSentimentLabel("");
     setSentimentScore(0);

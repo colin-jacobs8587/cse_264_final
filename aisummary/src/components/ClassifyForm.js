@@ -8,6 +8,7 @@ import {
   CONFIDENCE,
   ENTER_URL,
 } from "./Constants/Constants";
+import "../App.css";
 function ClassifyForm() {
   const [url, setUrl] = useState("");
   const [message, setMessage] = useState("");
