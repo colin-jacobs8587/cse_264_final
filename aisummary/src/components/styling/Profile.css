@@ -1,5 +1,3 @@
-/* src/styling/Profile.css */
-
 /* Container for Profile */
 .profile-container {
     max-width: 600px;
@@ -11,7 +9,7 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-/*the word Profile*/
+/* Title */
 .profile-container h2 {
     font-size: 32px;
     font-weight: bold;
@@ -20,6 +18,7 @@
     margin-bottom: 20px;
 }
 
+/* Greeting text */
 .profile-container p {
     font-size: 18px;
     color: #666;
@@ -27,17 +26,20 @@
     margin-top: 10px;
 }
 
-/* Profile Section (Subscription) box*/
+/* Profile sections */
 .profile-section {
     margin-bottom: 40px;
     padding: 20px;
     background-color: #f9f9f9;
     border-radius: 8px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+
+    /* Center all inline content */
+    text-align: center;
 }
 
-
-.profile-section button {
+/* Subscription button */
+.profile-section>button {
     padding: 12px 24px;
     background-color: #ae2764;
     color: white;
@@ -49,25 +51,37 @@
     margin-top: 15px;
 }
 
-.profile-section button:hover {
+.profile-section>button:hover {
     background-color: #650431;
     transform: translateY(-3px);
-    /* Slight lift effect */
 }
 
-/* Change Password Section box */
+/* Status message under subscription */
+.status-msg {
+    margin-top: 10px;
+    color: #5f4fd9;
+    font-size: 14px;
+    text-align: center;
+}
+
+/* Change Password Section */
+.profile-section h3 {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 15px;
+}
+
 .profile-section form {
     display: flex;
     flex-direction: column;
+    align-items: center;
+    /* center form children */
     gap: 15px;
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
 }
 
 .profile-section input {
     width: 100%;
+    max-width: 400px;
     padding: 12px;
     border: 1px solid #ddd;
     border-radius: 8px;
@@ -75,7 +89,12 @@
     transition: border-color 0.3s, box-shadow 0.3s;
 }
 
+.profile-section input:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 10px rgba(52, 152, 219, 0.5);
+}
 
+/* Submit button in form */
 .profile-section button[type="submit"] {
     padding: 12px 24px;
     background-color: #ae2764;
@@ -85,16 +104,15 @@
     cursor: pointer;
     font-size: 16px;
     transition: background-color 0.3s, transform 0.3s;
-    margin-top: 15px;
 }
 
 .profile-section button[type="submit"]:hover {
     background-color: #650431;
     transform: translateY(-3px);
-    /* Slight lift effect */
 }
 
-.profile-section .password-msg {
+/* Password update status */
+.password-msg {
     font-size: 14px;
     color: #e74c3c;
     margin-top: 10px;

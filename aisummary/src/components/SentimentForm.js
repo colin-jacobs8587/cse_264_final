@@ -5,9 +5,9 @@ import "../App.css";
 import {
   SENTIMENT_ANALYSIS,
   ANALYZE_SENTIMENT,
+  ENTER_URL,
   SENTIMENT,
   INTERPRETATION,
-  ENTER_URL,
 } from "./Constants/Constants";
 
 function SentimentForm() {
@@ -19,15 +19,14 @@ function SentimentForm() {
 
   const handleSentiment = async (e) => {
     e.preventDefault();
-
-    // only show spinner if request takes >600ms
     const loaderTimer = setTimeout(() => setLoading(true), 600);
 
+    setMessage("");
     setSentimentLabel("");
     setSentimentScore(0);
 
     try {
-      const response = await fetch("http://localhost:5000/api/sentiment", {
+      const res = await fetch("http://localhost:5000/api/sentiment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ url }),
@@ -37,32 +36,28 @@ function SentimentForm() {
       clearTimeout(loaderTimer);
       setLoading(false);
 
-      if (!response.ok) {
+      if (!res.ok) {
         setMessage("Failed to analyze sentiment.");
         return;
       }
-
-      const data = await response.json();
+      const data = await res.json();
       if (data.sentimentLabel) {
         setSentimentLabel(data.sentimentLabel);
         setSentimentScore(data.sentimentScore);
       } else {
         setMessage("No sentiment data available.");
       }
-    } catch (error) {
+    } catch (err) {
       clearTimeout(loaderTimer);
       setLoading(false);
-      console.error("[SentimentForm] Error:", error);
+      console.error(err);
       setMessage("Error fetching sentiment.");
     }
   };
 
-  // normalize 0–1 score to –1…+1
-  const normalize = (label, score) => {
-    return label.toLowerCase().includes("neg") ? -score : score;
-  };
+  const normalize = (label, score) =>
+    label.toLowerCase().includes("neg") ? -score : score;
 
-  // bucket normalized value into descriptions
   const describe = (val) => {
     if (val <= -0.8) return "Extremely negative";
     if (val <= -0.6) return "Very negative";
@@ -73,50 +68,44 @@ function SentimentForm() {
     return "Extremely positive";
   };
 
-  // pick an emoji
   const getEmoji = (label) => {
-    const l = label.toLowerCase();
-    if (l.includes("neg")) return "😢";
-    if (l.includes("pos")) return "😊";
+    if (label.toLowerCase().includes("neg")) return "😢";
+    if (label.toLowerCase().includes("pos")) return "😊";
     return "😐";
   };
 
   return (
-    <div className="form">
+    <div className="sentiment-container">
       {loading ? (
         <div className="orb-overlay">
           <div className="orb" />
         </div>
       ) : (
-        <>
+        <div className="form">
           <h2>{SENTIMENT_ANALYSIS}</h2>
           <form onSubmit={handleSentiment}>
             <input
               type="url"
-              placeholder= {ENTER_URL}
+              placeholder={ENTER_URL}
               value={url}
               onChange={(e) => setUrl(e.target.value)}
               required
             />
             <button type="submit">{ANALYZE_SENTIMENT}</button>
           </form>
-
           {message && <p className="message">{message}</p>}
-
           {sentimentLabel && (
             <div className="result">
-              <h3>{SENTIMENT} {getEmoji(sentimentLabel)}</h3>
-              {(() => {
-                const norm = normalize(sentimentLabel, sentimentScore);
-                return (
-                  <p>
-                    <strong>{INTERPRETATION}</strong> {describe(norm)}
-                  </p>
-                );
-              })()}
+              <h3>
+                {SENTIMENT} {getEmoji(sentimentLabel)}
+              </h3>
+              <p>
+                <strong>{INTERPRETATION}:</strong>{" "}
+                {describe(normalize(sentimentLabel, sentimentScore))}
+              </p>
             </div>
           )}
-        </>
+        </div>
       )}
     </div>
   );
