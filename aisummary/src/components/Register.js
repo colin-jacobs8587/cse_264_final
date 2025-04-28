@@ -6,6 +6,7 @@ import {
   PAID_SUBSCRIPTION,
   BACK_TO_LOGIN,
 } from "./Constants/Constants";
+import "../App.css";
 
 
 function Register() {
@@ -38,7 +39,7 @@ function Register() {
 
       // on success: show the orb, then redirect
       setShowOrb(true);
-      setTimeout(() => navigate("/"), 5000);
+      setTimeout(() => navigate("/"), 2000);
     } catch (err) {
       setMessage("Server error");
     }

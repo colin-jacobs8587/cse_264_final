@@ -3,7 +3,6 @@ import "./styling/Summarize.css";
 import "../App.css";
 import { SUMMARIZE, GET_SUMMARY, ENTER_URL } from "./Constants/Constants";
 
-
 function SummarizeForm() {
   const [url, setUrl] = useState("");
   const [message, setMessage] = useState("");
@@ -14,27 +13,17 @@ function SummarizeForm() {
   // whenever rawSummary changes, kick off the typewriter
   useEffect(() => {
     if (!rawSummary) return;
-  
+
     const clean = rawSummary
-      .split(/.<n>/g)
-      .map(s => s.trim().replace(/\.$/, ""))
+      .split(/<n>/g) // split on the tag itself
+      .map((s) => s.trim().replace(/\.$/, "")) // trim and strip any trailing “.” in each piece
       .filter(Boolean)
-      .join(". ")
-      .concat(".");
-  
-    let i = 0;
-    setTyped(clean.charAt(0));   
-  
-    const speed = 20;
-    const timer = setInterval(() => {
-      setTyped(t => t + clean[i]);
-      i++;
-      if (i >= clean.length) clearInterval(timer);
-    }, speed);
-  
-    return () => clearInterval(timer);
+      .join(". ") // dot + space between sentences
+      .concat(".") // one final dot
+      .replace(/\s+\./g, "."); // remove any space(s) before a dot
+
+    setTyped(clean);
   }, [rawSummary]);
-  
 
   const handleSummarize = async (e) => {
     e.preventDefault();
