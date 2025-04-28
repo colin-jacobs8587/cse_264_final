@@ -9,34 +9,39 @@ function SummarizeForm() {
   const [message, setMessage] = useState("");
   const [rawSummary, setRawSummary] = useState("");
   const [typed, setTyped] = useState("");
-  const [showOrb, setShowOrb] = useState(false);
+  const [Loading, setLoading] = useState(false);
 
   // whenever rawSummary changes, kick off the typewriter
   useEffect(() => {
     if (!rawSummary) return;
-
-    // 1) clean it
-    const clean = rawSummary.replace(/<n>/g, " ").replace(/ \./g, ".").trim();
-
-    // 2) animate
+  
+    const clean = rawSummary
+      .split(/.<n>/g)
+      .map(s => s.trim().replace(/\.$/, ""))
+      .filter(Boolean)
+      .join(". ")
+      .concat(".");
+  
     let i = 0;
-    setTyped("");
-    const speed = 20; // ms per char
+    setTyped(clean.charAt(0));   
+  
+    const speed = 20;
     const timer = setInterval(() => {
-      setTyped((t) => t + clean.charAt(i));
+      setTyped(t => t + clean[i]);
       i++;
       if (i >= clean.length) clearInterval(timer);
     }, speed);
-
+  
     return () => clearInterval(timer);
   }, [rawSummary]);
+  
 
   const handleSummarize = async (e) => {
     e.preventDefault();
     setMessage("");
     setRawSummary("");
     setTyped("");
-    const loaderTimer = setTimeout(() => setShowOrb(true), 200);
+    const loaderTimer = setTimeout(() => setLoading(true), 200);
 
     try {
       const res = await fetch("http://localhost:5000/api/summarize", {
@@ -46,7 +51,7 @@ function SummarizeForm() {
         credentials: "include",
       });
       clearTimeout(loaderTimer);
-      setShowOrb(false);
+      setLoading(false);
 
       if (!res.ok) {
         setMessage("Failed to summarize.");
@@ -59,14 +64,14 @@ function SummarizeForm() {
     } catch (err) {
       console.error(err);
       clearTimeout(loaderTimer);
-      setShowOrb(false);
+      setLoading(false);
       setMessage("Error fetching summary.");
     }
   };
 
   return (
     <div className="summarize-container">
-      {showOrb ? (
+      {Loading ? (
         <div className="orb-overlay">
           <div className="orb" />
         </div>
