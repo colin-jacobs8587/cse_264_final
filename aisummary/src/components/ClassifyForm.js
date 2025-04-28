@@ -77,8 +77,8 @@ function ClassifyForm() {
               <h3>{CLASSIFICATION_RESULTS}</h3>
               {result.map(({ label, score }, i) => (
                 <p key={i}>
-                  <strong>{TOPIC}:</strong> {label} <br />
-                  <strong>{CONFIDENCE}:</strong> {score.toFixed(4)}
+                  <strong>{TOPIC}</strong> {label} <br />
+                  <strong>{CONFIDENCE}</strong> {score.toFixed(4)}
                 </p>
               ))}
             </div>
