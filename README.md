@@ -71,8 +71,9 @@
 
 ## 🔧 Setup Instructions
 1. Clone the repo
-2. Make sure redis is up
-3. From the root directory, run 'sh run.sh'
+2. Make sure you have appropriate .env
+3. Make sure redis is up
+4. From the root directory, run 'sh run.sh'
 
 ## 📈 High-level architecture diagram
 
