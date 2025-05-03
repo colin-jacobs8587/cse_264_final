@@ -75,5 +75,5 @@
 3. Make sure redis is up
 4. From the root directory, run 'sh run.sh'
 
-## 📈 High-level architecture diagram
+## 📈 High-Level Architecture Diagram
 
